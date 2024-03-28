@@ -30,4 +30,4 @@ Open the `EConfigManager` window through Unity's top menu `Escripts > EConfigMan
 All changes will be saved immediately to the Unity Asset Database.
 The Clean List button allows you to clear the current list of configurations, and the ALL button populates the list with all available ScriptableObjects.
 
-By the way, the Scriptable EConfigHandle will be created after you press 'SET' and will be placed in the /Assets directory.
+!By the way, the Scriptable EConfigHandle will be created after you press 'SET' and will be placed in the /Assets directory!
