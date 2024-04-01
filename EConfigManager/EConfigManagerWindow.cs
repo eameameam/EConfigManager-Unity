@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -11,19 +9,13 @@ public class EConfigManagerWindow : EditorWindow
     Vector2 _scrollPosition;
     Dictionary<ScriptableObject, bool> _foldouts = new Dictionary<ScriptableObject, bool>();
     Dictionary<ScriptableObject, SerializedObject> _serializedConfigs = new Dictionary<ScriptableObject, SerializedObject>();
-    SortType _currentSortType = SortType.Name;
+    ConfigSorter.SortType _currentSortType = ConfigSorter.SortType.Name;
     bool _ascending = true;
     bool _configsSorted = true;
 
     public static EConfigManagerWindow Instance { get; set; }
     public delegate void ConfigsChangedDelegate();
     public static event ConfigsChangedDelegate OnConfigsChanged;
-
-    enum SortType
-    {
-        Name,
-        DateModified
-    }
 
     [MenuItem("Escripts/EConfig Manager")]
     public static void ShowWindow()
@@ -68,10 +60,35 @@ public class EConfigManagerWindow : EditorWindow
 
         GUILayout.EndHorizontal();
 
-        GUILayout.Space(20);
+        GUILayout.BeginHorizontal();
+
+        GUILayout.FlexibleSpace();
+
+        GUILayout.BeginVertical(GUILayout.Width(30), GUILayout.Height(30));
+        GUILayout.Label("Backup", EditorStyles.whiteLabel);
+        if (GUILayout.Button("Save"))
+        {
+            if (EditorUtility.DisplayDialog("Save Backup", "Are you sure you want to save the backup?", "Save", "Cancel"))
+            {
+                BackupManager.SaveBackup();
+                Debug.Log("Backup saved.");
+            }
+        }
+        if (GUILayout.Button("Load"))
+        {
+            if (EditorUtility.DisplayDialog("Load Backup", "Are you sure you want to load the backup?", "Load", "Cancel"))
+            {
+                BackupManager.RestoreBackup();
+                Debug.Log("Backup loaded.");
+            }
+        }
+        GUILayout.EndVertical();
+
+        GUILayout.Space(10); 
+
+        GUILayout.EndHorizontal();
 
         GUILayout.Label("Configs", EditorStyles.helpBox);
-
 
         if (!(_eConfigHolder.configs.Count > 0))
         {
@@ -81,7 +98,7 @@ public class EConfigManagerWindow : EditorWindow
             return;
         }
 
-        DrawSortOptions();
+        EConfigGUI.DrawSortOptions(ref _currentSortType, ref _ascending, () => SortConfigs());
 
         if (!_configsSorted)
         {
@@ -95,7 +112,8 @@ public class EConfigManagerWindow : EditorWindow
             {
                 if (config != null)
                 {
-                    DrawConfig(config);
+                    SerializedObject serializedConfig = _serializedConfigs[config];
+                    EConfigGUI.DrawConfig(serializedConfig, _foldouts, _serializedConfigs, config);
                 }
             }
         }
@@ -128,16 +146,7 @@ public class EConfigManagerWindow : EditorWindow
 
     void SortConfigs()
     {
-        var configs = _eConfigHolder.configs;
-        switch (_currentSortType)
-        {
-            case SortType.Name:
-                configs.Sort((a, b) => string.Compare(a.name, b.name, StringComparison.Ordinal) * (_ascending ? 1 : -1));
-                break;
-            case SortType.DateModified:
-                configs.Sort((a, b) => DateTime.Compare(File.GetLastWriteTime(AssetDatabase.GetAssetPath(a)), File.GetLastWriteTime(AssetDatabase.GetAssetPath(b))) * (_ascending ? 1 : -1));
-                break;
-        }
+        ConfigSorter.SortConfigs(_eConfigHolder.configs, _currentSortType, _ascending);
         _configsSorted = true;
         EditorUtility.SetDirty(_eConfigHolder);
     }
@@ -146,56 +155,6 @@ public class EConfigManagerWindow : EditorWindow
     {
         LoadConfigs();
         Repaint();
-    }
-
-    void DrawConfig(ScriptableObject config)
-    {
-        if (!_foldouts.ContainsKey(config) || !_serializedConfigs.ContainsKey(config)) return;
-
-        _foldouts[config] = EditorGUILayout.Foldout(_foldouts[config], config.name);
-        if (_foldouts[config])
-        {
-            SerializedObject serializedConfig = _serializedConfigs[config];
-            SerializedProperty iterator = serializedConfig.GetIterator();
-            GUILayout.BeginVertical("box");
-            bool enterChildren = true;
-            while (iterator.NextVisible(enterChildren))
-            {
-                enterChildren = false;
-                EditorGUILayout.PropertyField(iterator, true);
-            }
-            GUILayout.EndVertical();
-            serializedConfig.ApplyModifiedProperties();
-
-            if (serializedConfig.hasModifiedProperties)
-            {
-                EditorUtility.SetDirty(config);
-            }
-        }
-    }
-
-    void DrawSortOptions()
-    {
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Sort by Name"))
-        {
-            _currentSortType = SortType.Name;
-            SortConfigs();
-            Repaint();
-        }
-        if (GUILayout.Button("Sort by Date Modified"))
-        {
-            _currentSortType = SortType.DateModified;
-            SortConfigs();
-            Repaint(); 
-        }
-        _ascending = GUILayout.Toggle(_ascending, _ascending ? "Ascending" : "Descending", "Button");
-        if (GUI.changed)
-        {
-            SortConfigs();
-            Repaint(); 
-        }
-        GUILayout.EndHorizontal();
     }
 
     static void SubscribeToEvents()
