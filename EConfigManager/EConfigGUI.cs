@@ -96,22 +96,22 @@ public static class EConfigGUI
     public static void DrawSortOptions(ref SortType currentSortType, ref bool ascending, Action sortConfigsCallback)
     {
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Sort by Name"))
+        if (GUILayout.Button("Name"))
         {
             currentSortType = SortType.Name;
             sortConfigsCallback.Invoke();
         }
-        if (GUILayout.Button("Sort by Date Modified"))
+        if (GUILayout.Button("Date Modified"))
         {
             currentSortType = SortType.DateModified;
             sortConfigsCallback.Invoke();
         }
-        if (GUILayout.Button("Sort by Script Type"))
+        if (GUILayout.Button("Script Type"))
         {
             currentSortType = SortType.ScriptType;
             sortConfigsCallback.Invoke();
         }
-        ascending = GUILayout.Toggle(ascending, ascending ? "Ascending" : "Descending", "Button");
+        ascending = GUILayout.Toggle(ascending, ascending ? "\u25B2" : "\u25BC", "Button", GUILayout.Width(20));
         if (GUI.changed)
         {
             sortConfigsCallback.Invoke();
