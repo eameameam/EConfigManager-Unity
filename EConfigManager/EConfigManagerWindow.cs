@@ -11,8 +11,9 @@ public class EConfigManagerWindow : EditorWindow
     Dictionary<ScriptableObject, SerializedObject> _serializedConfigs = new Dictionary<ScriptableObject, SerializedObject>();
     ConfigSorter.SortType _currentSortType = ConfigSorter.SortType.Name;
     bool _ascending = true;
+    bool _grouping = false;
     bool _configsSorted = true;
-
+    
     public static EConfigManagerWindow Instance { get; set; }
     public delegate void ConfigsChangedDelegate();
     public static event ConfigsChangedDelegate OnConfigsChanged;
@@ -98,7 +99,7 @@ public class EConfigManagerWindow : EditorWindow
             return;
         }
 
-        EConfigGUI.DrawSortOptions(ref _currentSortType, ref _ascending, () => SortConfigs());
+        EConfigGUI.DrawSortOptions(ref _currentSortType, ref _ascending, ref _grouping,() => SortConfigs());
 
         if (!_configsSorted)
         {
