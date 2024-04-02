@@ -116,29 +116,50 @@ public static class EConfigGUI
         foldouts[config] = foldoutState;
     }
 
-    public static void DrawSortOptions(ref SortType currentSortType, ref bool ascending, Action sortConfigsCallback)
+    public static void DrawSortOptions(ref SortType currentSortType, ref bool ascending, ref bool grouping, Action sortConfigsCallback)
     {
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Name"))
+        
+        if (GUILayout.Toggle(currentSortType == SortType.Name, "Name", "Button"))
         {
-            currentSortType = SortType.Name;
-            sortConfigsCallback.Invoke();
+            if (currentSortType != SortType.Name)
+            {
+                currentSortType = SortType.Name;
+                sortConfigsCallback.Invoke();
+                GUI.changed = true; 
+            }
         }
-        if (GUILayout.Button("Date Modified"))
+
+        if (GUILayout.Toggle(currentSortType == SortType.DateModified, "Date Modified", "Button"))
         {
-            currentSortType = SortType.DateModified;
-            sortConfigsCallback.Invoke();
+            if (currentSortType != SortType.DateModified)
+            {
+                currentSortType = SortType.DateModified;
+                sortConfigsCallback.Invoke();
+                GUI.changed = true; 
+            }
         }
-        if (GUILayout.Button("Script Type"))
+
+        if (GUILayout.Toggle(currentSortType == SortType.ScriptType, "Script Type", "Button"))
         {
-            currentSortType = SortType.ScriptType;
-            sortConfigsCallback.Invoke();
+            if (currentSortType != SortType.ScriptType)
+            {
+                currentSortType = SortType.ScriptType;
+                sortConfigsCallback.Invoke();
+                GUI.changed = true; 
+            }
         }
+
+        grouping = GUILayout.Toggle(grouping, "\u2630", "Button", GUILayout.Width(20));
+
+        bool prevAscending = ascending;
         ascending = GUILayout.Toggle(ascending, ascending ? "\u25B2" : "\u25BC", "Button", GUILayout.Width(20));
-        if (GUI.changed)
+        if (ascending != prevAscending)
         {
             sortConfigsCallback.Invoke();
+            GUI.changed = true; 
         }
+
         GUILayout.EndHorizontal();
     }
 }
