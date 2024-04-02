@@ -6,16 +6,16 @@ using System.Collections.Generic;
 
 public static class EConfigGUI
 {
-    public static void DrawConfig(SerializedObject serializedConfig, Dictionary<ScriptableObject, bool> foldouts, Dictionary<ScriptableObject, SerializedObject> serializedConfigs, ScriptableObject config)
+    public static void DrawConfig(SerializedObject serializedConfig, Dictionary<ScriptableObject, bool> foldouts, ScriptableObject config)
     {
         bool hasMissingField = CheckForMissingFields(serializedConfig);
         GUIStyle foldoutStyle = CreateFoldoutStyle(hasMissingField);
-
+        
         bool foldoutState = DrawFoldoutHeader(config, foldoutStyle, foldouts);
 
         if (foldoutState)
         {
-            DrawProperties(serializedConfig);
+            DrawProperties(serializedConfig, config, foldouts);
         }
     }
 
@@ -74,23 +74,46 @@ public static class EConfigGUI
         return foldoutState;
     }
 
-    private static void DrawProperties(SerializedObject serializedConfig)
+    public static void DrawProperties(SerializedObject serializedConfig, ScriptableObject config, Dictionary<ScriptableObject, bool> foldouts)
     {
-        serializedConfig.Update();
-        SerializedProperty iterator = serializedConfig.GetIterator();
-        iterator.NextVisible(true);
-        GUILayout.BeginVertical("box");
-        do
-        {
-            EditorGUILayout.PropertyField(iterator, true);
-        }
-        while (iterator.NextVisible(false));
-        GUILayout.EndVertical();
+        string assetPath = AssetDatabase.GetAssetPath(config);
+        bool foldoutState = foldouts[config];
 
-        if (serializedConfig.ApplyModifiedProperties())
+        bool hasMissingField = CheckForMissingFields(serializedConfig);
+
+        GUIStyle foldoutStyle = CreateFoldoutStyle(hasMissingField);
+
+        foldoutState = DrawFoldoutHeader(config, foldoutStyle, foldouts);
+
+        if (foldoutState)
         {
-            EditorUtility.SetDirty(serializedConfig.targetObject);
+            serializedConfig.Update();
+            SerializedProperty iterator = serializedConfig.GetIterator();
+            iterator.NextVisible(true);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Restore", GUILayout.Width(60)))
+            {
+                BackupManager.RestoreBackup(assetPath);
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginVertical("box");
+            do
+            {
+                EditorGUILayout.PropertyField(iterator, true);
+            }
+            while (iterator.NextVisible(false));
+            GUILayout.EndVertical();
+
+            if (serializedConfig.ApplyModifiedProperties())
+            {
+                EditorUtility.SetDirty(serializedConfig.targetObject);
+            }
         }
+
+        foldouts[config] = foldoutState;
     }
 
     public static void DrawSortOptions(ref SortType currentSortType, ref bool ascending, Action sortConfigsCallback)

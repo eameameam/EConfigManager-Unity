@@ -12,10 +12,10 @@ public class ConfigSorter
         DateModified,
         ScriptType
     }
-    
+
     public static void SortConfigs(List<ScriptableObject> configs, SortType sortType, bool ascending)
     {
-        configs.RemoveAll(item => item == null); // Remove any null entries
+        configs.RemoveAll(item => item == null);
         switch (sortType)
         {
             case SortType.Name:

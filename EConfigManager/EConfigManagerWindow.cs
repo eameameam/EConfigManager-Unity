@@ -74,9 +74,9 @@ public class EConfigManagerWindow : EditorWindow
                 Debug.Log("Backup saved.");
             }
         }
-        if (GUILayout.Button("Load"))
+        if (GUILayout.Button("Restore"))
         {
-            if (EditorUtility.DisplayDialog("Load Backup", "Are you sure you want to load the backup?", "Load", "Cancel"))
+            if (EditorUtility.DisplayDialog("Restore Backup for all configs", "Are you sure you want to restore the backup for all configs in the list?", "Restore", "Cancel"))
             {
                 BackupManager.RestoreBackup();
                 Debug.Log("Backup loaded.");
@@ -113,7 +113,7 @@ public class EConfigManagerWindow : EditorWindow
                 if (config != null)
                 {
                     SerializedObject serializedConfig = _serializedConfigs[config];
-                    EConfigGUI.DrawConfig(serializedConfig, _foldouts, _serializedConfigs, config);
+                    EConfigGUI.DrawProperties(serializedConfig, config, _foldouts);
                 }
             }
         }

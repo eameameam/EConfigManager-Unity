@@ -75,7 +75,35 @@ public static class BackupManager
         Debug.Log($"Backup saved to {BackupFilePath}");
     }
 
-    public static void RestoreBackup(string specificAssetPath = null)
+    public static void RestoreBackup()
+    {
+        RestoreBackupInternal();
+    }
+    public static void RestoreBackup(string assetPath = null)
+    {
+        if (!File.Exists(BackupFilePath)) { Debug.LogError("Backup file not found."); return; }
+        
+        var backupWrapper = JsonUtility.FromJson<BackupWrapper>(File.ReadAllText(BackupFilePath));
+        bool restoreAll = string.IsNullOrEmpty(assetPath);
+        
+        foreach (var entry in backupWrapper.backups)
+        {
+            if (restoreAll || entry.assetPath.Equals(assetPath, StringComparison.OrdinalIgnoreCase))
+            {
+                var config = AssetDatabase.LoadAssetAtPath<ScriptableObject>(entry.assetPath);
+                if (config == null) { Debug.LogError($"Asset not found: {entry.assetPath}"); continue; }
+                RestoreReferences(new SerializedObject(config), entry.references);
+
+                if (!restoreAll)
+                    break;
+            }
+        }
+
+        AssetDatabase.Refresh();
+        Debug.Log(restoreAll ? "All backups restored." : $"Backup restored for {assetPath}.");
+    }
+
+    private static void RestoreBackupInternal(string specificAssetPath = null)
     {
         if (!File.Exists(BackupFilePath)) { Debug.LogError("Backup file not found."); return; }
         var backupWrapper = JsonUtility.FromJson<BackupWrapper>(File.ReadAllText(BackupFilePath));
