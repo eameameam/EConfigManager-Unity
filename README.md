@@ -2,7 +2,7 @@
 
 EConfig Management Tools is a set of Unity Editor extensions that streamline the management and organization of ScriptableObjects representing configurations or settings in your game development workflow.
 
-![EConfigManager Window](/EConfigManager.png)
+
 
 ## Features
 
