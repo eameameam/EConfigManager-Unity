@@ -6,19 +6,6 @@ using System.Collections.Generic;
 
 public static class EConfigGUI
 {
-    public static void DrawConfig(SerializedObject serializedConfig, Dictionary<ScriptableObject, bool> foldouts, ScriptableObject config)
-    {
-        bool hasMissingField = CheckForMissingFields(serializedConfig);
-        GUIStyle foldoutStyle = CreateFoldoutStyle(hasMissingField);
-        
-        bool foldoutState = DrawFoldoutHeader(config, foldoutStyle, foldouts);
-
-        if (foldoutState)
-        {
-            DrawProperties(serializedConfig, config, foldouts);
-        }
-    }
-
     private static bool CheckForMissingFields(SerializedObject serializedConfig)
     {
         SerializedProperty iterator = serializedConfig.GetIterator();
