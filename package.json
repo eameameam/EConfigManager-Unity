@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "displayName": "EConfig Manager",
   "description": "A Unity Editor tool for managing configurations.",
-  "unity": "2019.4", // Минимальная поддерживаемая версия Unity.
+  "unity": "2019.4", 
   "author": {
     "name": "Nikita Pankrashov",
     "email": "eam.motion@gmail.com"
